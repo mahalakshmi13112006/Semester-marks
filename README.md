@@ -18,7 +18,7 @@ A simple, responsive web app to calculate internal marks, estimate the final sem
 
 **Try the Semester Mark Generator here:**
 
-[Open Semester Mark Generator](https://mahalakshmi13112006.github.io/Semester-mark-generator-SIST-/)
+[Open Semester Mark Generator]([https://mahalakshmi13112006.github.io/Semester-mark-generator-SIST-/](https://mahalakshmi13112006.github.io/Semester-mark-generator-SIST-/?utm_source=chatgpt.com))
 
 A simple, interactive calculator to estimate internal marks, final semester totals, and the minimum exam marks required to reach the pass mark.
 ## Mark calculation
