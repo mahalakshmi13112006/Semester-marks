@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Semester Mark Generator</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --site-primary: #5946D2;
+  --site-on-primary: #FFFFFF;
+  --site-secondary: #DDF6EC;
+  --site-on-secondary: #153C31;
+  --site-background: #F5F4FC;
+  --site-on-background: #202039;
+  --site-font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --site-font-heading: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --site-heading-scale: 1;
+  --site-spacing-scale: 1;
+  --site-radius-scale: 1;
+  --site-decoration-opacity: 1;
+  --surface: light-dark(#FFFFFF, #1E1D2B);
+  --surface-soft: light-dark(#F1EFFF, #29263D);
+  --text: light-dark(#202039, #F5F3FF);
+  --muted: light-dark(#686780, #B7B4CD);
+  --border: light-dark(#E3E0F1, #413D58);
+  --field: light-dark(#FFFFFF, #272538);
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--site-font-body); background: var(--site-background); color: var(--site-on-background); }
+#app { min-height: 100vh; width: 100%; background-color: var(--site-background); color: var(--site-on-background); overflow: hidden; border-radius: 0; }
+.hero { background: var(--site-primary); color: var(--site-on-primary); padding: calc(36px * var(--site-spacing-scale)) max(22px, calc((100vw - 1040px) / 2)); position: relative; overflow: hidden; }
+.hero::after { content:""; position:absolute; width:240px;height:240px;border:1px solid rgba(255,255,255,.18);border-radius:50%;right:7%;top:-135px;box-shadow:0 0 0 28px rgba(255,255,255,.05),0 0 0 60px rgba(255,255,255,.035);opacity:var(--site-decoration-opacity);pointer-events:none; }
+.eyebrow { text-transform: uppercase; letter-spacing: .15em; font-size: .76rem; font-weight: 800; opacity: .82; }
+h1 { font-family:var(--site-font-heading); font-size:calc(2.15rem * var(--site-heading-scale)); line-height:1.1; margin:12px 0 10px; letter-spacing:-.045em; }
+.hero p { margin:0; max-width:600px; opacity:.88; line-height:1.6; }
+.wrap { max-width:1040px; margin:0 auto; padding:calc(26px * var(--site-spacing-scale)) 22px 48px; }
+.grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px; align-items:start; }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:calc(20px * var(--site-radius-scale)); padding:calc(22px * var(--site-spacing-scale)); box-shadow:0 8px 30px rgba(42,32,92,.045); }
+h2 { font-size:1.15rem; margin:0 0 5px; letter-spacing:-.02em; color:var(--text); }
+.sub { color:var(--muted); font-size:.9rem; line-height:1.5; margin:0 0 20px; }
+.fields { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.field { display:flex; flex-direction:column; gap:7px; min-width:0; }
+label { color:var(--text); font-size:.87rem; font-weight:700; }
+.hint { color:var(--muted); font-size:.75rem; font-weight:500; }
+input { width:100%; min-width:0; padding:13px 12px; border:1px solid var(--border); border-radius:calc(11px * var(--site-radius-scale)); background:var(--field); color:var(--text); font:inherit; font-size:1rem; outline:none; }
+input:focus { border-color:var(--site-primary); box-shadow:0 0 0 3px color-mix(in srgb, var(--site-primary) 17%, transparent); }
+.full { grid-column:1/-1; }
+.internal { background:var(--site-secondary); color:var(--site-on-secondary); border-radius:calc(15px * var(--site-radius-scale)); padding:17px; margin-top:18px; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.internal .label { font-weight:700; font-size:.9rem; }
+.internal small { display:block; margin-top:4px; opacity:.76; }
+.big { font-weight:850; font-size:1.65rem; letter-spacing:-.04em; white-space:nowrap; }
+.status { font-size:.78rem; font-weight:800; padding:6px 9px; border-radius:999px; display:inline-block; margin-top:8px; }
+.status.pass { background:#DDF6E7; color:#17613A; }
+.status.fail { background:#FFE7E6; color:#9E2727; }
+.status.neutral { background:var(--surface-soft); color:var(--text); }
+.result-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.result-total { background:var(--site-primary); color:var(--site-on-primary); border-radius:calc(17px * var(--site-radius-scale)); padding:20px; margin:16px 0; }
+.result-total .small { font-size:.83rem; opacity:.82; }
+.result-total .number { font-size:2.5rem; font-weight:850; letter-spacing:-.06em; line-height:1.2; margin-top:4px; }
+.result-total .denom { font-size:1rem; font-weight:600; opacity:.82; letter-spacing:0; }
+.meter { height:8px; background:rgba(255,255,255,.25); border-radius:99px; margin-top:14px; overflow:hidden; }
+.meter-fill { height:100%; width:0; background:#FFFFFF; border-radius:99px; transition:width .2s; }
+.stat-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.mini { background:var(--surface-soft); border-radius:calc(13px * var(--site-radius-scale)); padding:15px; min-width:0; }
+.mini .k { color:var(--muted); font-size:.78rem; line-height:1.4; }
+.mini .v { color:var(--text); font-size:1.4rem; font-weight:800; margin-top:7px; overflow-wrap:anywhere; }
+.mini .note { color:var(--muted); font-size:.75rem; margin-top:3px; line-height:1.4; }
+.divider { border:0; border-top:1px solid var(--border); margin:20px 0; }
+.test-title { color:var(--text); font-weight:800; margin-bottom:5px; }
+.need { font-size:1.45rem; font-weight:850; color:var(--text); margin-top:8px; }
+.note-box { margin-top:14px; padding:12px 14px; background:var(--surface-soft); border-radius:12px; color:var(--muted); font-size:.82rem; line-height:1.5; }
+.formula { color:var(--muted); font-size:.78rem; line-height:1.6; margin-top:15px; }
+footer { text-align:center; color:var(--muted); font-size:.78rem; padding:0 20px 28px; }
+button { background:var(--site-primary); color:var(--site-on-primary); border:0; border-radius:10px; padding:10px 14px; font:inherit; font-weight:700; cursor:pointer; }
+button:hover { filter:brightness(1.08); }
+@media(max-width:700px) { .grid{grid-template-columns:1fr}.hero{padding:30px 22px}.wrap{padding:18px 14px 32px}h1{font-size:calc(1.8rem * var(--site-heading-scale))}.card{padding:18px}.hero::after{right:-130px} }
+@media(max-width:390px) { .fields{grid-template-columns:1fr}.full{grid-column:auto}.internal{align-items:flex-start;flex-direction:column}.stat-row{grid-template-columns:1fr 1fr} }
+</style>
+</head>
+<body>
+<div id="app" data-sites-preview-theme="custom">
+  <header class="hero">
+    <div class="eyebrow">Your personal marks planner</div>
+    <h1>Semester Mark<br>Generator</h1>
+    <p>Know your internal score, calculate the semester marks you need to pass, and test different exam scores to see your final total out of 100.</p>
+  </header>
+  <main class="wrap">
+    <div class="grid">
+      <section class="card">
+        <h2>01 · Enter your marks</h2>
+        <p class="sub">Enter marks you have already earned. You can change them anytime.</p>
+        <div class="fields">
+          <div class="field">
+            <label for="cae1">CAE 1 <span class="hint">/ 50</span></label>
+            <input id="cae1" type="number" min="0" max="50" step="0.5" value="40" inputmode="decimal">
+          </div>
+          <div class="field">
+            <label for="cae2">CAE 2 <span class="hint">/ 50</span></label>
+            <input id="cae2" type="number" min="0" max="50" step="0.5" value="35" inputmode="decimal">
+          </div>
+          <div class="field full">
+            <label for="assignment">Assignment <span class="hint">/ 20</span></label>
+            <input id="assignment" type="number" min="0" max="20" step="0.5" value="15" inputmode="decimal">
+          </div>
+        </div>
+        <div class="internal">
+          <div>
+            <div class="label">Your internal marks</div>
+            <small>Out of 50 · (CAE 1 + CAE 2) × 0.3 + assignment</small>
+          </div>
+          <div class="big"><span id="internalValue">37.5</span><span style="font-size:.9rem;font-weight:650"> / 50</span></div>
+        </div>
+        <div class="formula">Formula used: (CAE 1 + CAE 2) × 0.3 + Assignment. Internal marks are capped at 50.</div>
+      </section>
+      <section class="card">
+        <div class="result-top">
+          <div>
+            <h2>02 · Your semester plan</h2>
+            <p class="sub" style="margin-bottom:0">Semester exam is out of 100, then scaled to 50 for the final total.</p>
+          </div>
+        </div>
+        <div class="result-total">
+          <div class="small">Your projected final total</div>
+          <div class="number"><span id="totalValue">62.5</span><span class="denom"> / 100</span></div>
+          <div class="meter"><div class="meter-fill" id="meterFill"></div></div>
+          <div id="overallStatus" class="status pass">Pass mark reached</div>
+        </div>
+        <div class="stat-row">
+          <div class="mini">
+            <div class="k">Internal contribution</div>
+            <div class="v"><span id="internalContribution">37.5</span><small style="font-size:.8rem;font-weight:600"> / 50</small></div>
+            <div class="note">Already earned</div>
+          </div>
+          <div class="mini">
+            <div class="k">Semester contribution</div>
+            <div class="v"><span id="semesterContribution">25</span><small style="font-size:.8rem;font-weight:600"> / 50</small></div>
+            <div class="note">Based on your test mark</div>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="test-title">Try a semester exam mark</div>
+        <p class="sub">Change this number to instantly see how your final total changes.</p>
+        <div class="field">
+          <label for="semester">Your expected semester mark <span class="hint">/ 100</span></label>
+          <input id="semester" type="number" min="0" max="100" step="1" value="50" inputmode="decimal">
+        </div>
+        <div class="need" id="testSummary">50/100 → 62.5/100 overall</div>
+        <div id="testStatus" class="status pass">Pass mark reached</div>
+        <hr class="divider">
+        <div class="test-title">Minimum semester marks needed</div>
+        <div class="need" id="neededValue">25/100</div>
+        <div id="neededStatus" class="status pass">You can reach 50 overall</div>
+        <div class="note-box" id="neededNote">You need at least 25 marks in the semester exam to reach 50/100 overall.</div>
+      </section>
+    </div>
+  </main>
+  <footer>Made for easier exam planning · Update the inputs to explore different outcomes.</footer>
+</div>
+<script>
+(function () {
+  const cae1 = document.getElementById('cae1');
+  const cae2 = document.getElementById('cae2');
+  const assignment = document.getElementById('assignment');
+  const semester = document.getElementById('semester');
+  const ids = ['internalValue','totalValue','meterFill','overallStatus','internalContribution','semesterContribution','testSummary','testStatus','neededValue','neededStatus','neededNote'];
+  const el = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
+  const fmt = n => Number(n.toFixed(2)).toString();
+  function read(input, max) {
+    if (input.value.trim() === '') return null;
+    const n = Number(input.value);
+    if (!Number.isFinite(n) || n < 0 || n > max) return null;
+    return n;
+  }
+  function setStatus(node, message, passed) {
+    node.textContent = message;
+    node.className = 'status ' + (passed === null ? 'neutral' : passed ? 'pass' : 'fail');
+  }
+  function update() {
+    const a = read(cae1, 50), b = read(cae2, 50), as = read(assignment, 20), s = read(semester, 100);
+    const validInputs = a !== null && b !== null && as !== null;
+    [cae1,cae2,assignment,semester].forEach((input, i) => {
+      const max = [50,50,20,100][i];
+      const n = input.value.trim() === '' ? null : Number(input.value);
+      input.setCustomValidity(n === null || (Number.isFinite(n) && n >= 0 && n <= max) ? '' : 'Enter a mark from 0 to ' + max + '.');
+    });
+    if (!validInputs) {
+      el.internalValue.textContent = '—';
+      el.totalValue.textContent = '—';
+      el.internalContribution.textContent = '—';
+      el.semesterContribution.textContent = '—';
+      el.testSummary.textContent = 'Enter valid CAE and assignment marks.';
+      el.neededValue.textContent = '—';
+      el.neededNote.textContent = 'Use marks within the allowed ranges to calculate your result.';
+      el.meterFill.style.width = '0%';
+      setStatus(el.overallStatus, 'Waiting for valid marks', null);
+      setStatus(el.testStatus, 'Waiting for valid marks', null);
+      setStatus(el.neededStatus, 'Waiting for valid marks', null);
+      return;
+    }
+    const internal = Math.min(50, (a + b) * 0.3 + as);
+    el.internalValue.textContent = fmt(internal);
+    el.internalContribution.textContent = fmt(internal);
+    const needed = Math.max(0, (50 - internal) * 2);
+    el.neededValue.textContent = needed <= 100 ? fmt(needed) + '/100' : 'Not possible';
+    if (needed <= 100) {
+      setStatus(el.neededStatus, 'You can reach 50 overall', true);
+      el.neededNote.textContent = needed === 0
+        ? 'Your internal marks are already 50/50, so you have reached 50 overall even with 0 in the semester exam.'
+        : 'You need at least ' + fmt(needed) + ' marks out of 100 in the semester exam to reach 50/100 overall.';
+    } else {
+      setStatus(el.neededStatus, '50 overall cannot be reached', false);
+      el.neededNote.textContent = 'Even 100/100 in the semester exam will not bring your total to 50. Check your internal marks and confirm your college rules.';
+    }
+    if (s === null) {
+      el.totalValue.textContent = '—';
+      el.semesterContribution.textContent = '—';
+      el.testSummary.textContent = 'Enter a semester mark from 0 to 100.';
+      el.meterFill.style.width = '0%';
+      setStatus(el.overallStatus, 'Waiting for semester mark', null);
+      setStatus(el.testStatus, 'Waiting for semester mark', null);
+      return;
+    }
+    const contribution = s * 0.5;
+    const total = internal + contribution;
+    el.semesterContribution.textContent = fmt(contribution);
+    el.totalValue.textContent = fmt(total);
+    el.meterFill.style.width = Math.min(100, total) + '%';
+    el.testSummary.textContent = fmt(s) + '/100 → ' + fmt(total) + '/100 overall';
+    const passed = total >= 50;
+    setStatus(el.overallStatus, passed ? 'Pass mark reached' : 'Below 50 pass mark', passed);
+    setStatus(el.testStatus, passed ? 'Pass mark reached' : 'Need ' + fmt(50 - total) + ' more overall marks', passed);
+  }
+  [cae1,cae2,assignment,semester].forEach(input => input.addEventListener('input', update));
+  update();
+})();
+</script>
+</body>
+</html>
