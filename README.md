@@ -14,6 +14,13 @@ A simple, responsive web app to calculate internal marks, estimate the final sem
 - Responsive layout for desktop and mobile
 - Built with HTML, CSS, and JavaScript; no installation required
 
+## 🌐 Live Website
+
+**Try the Semester Mark Generator here:**
+
+[Open Semester Mark Generator](https://mahalakshmi13112006.github.io/Semester-mark-generator-SIST-/)
+
+A simple, interactive calculator to estimate internal marks, final semester totals, and the minimum exam marks required to reach the pass mark.
 ## Mark calculation
 
 - **Internal marks** = `(CAE 1 + CAE 2) × 0.3 + Assignment` (capped at 50)
